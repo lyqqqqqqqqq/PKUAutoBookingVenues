@@ -1,9 +1,9 @@
 # PKUAutoBookingVenues
-# PKU智慧场馆自动预约工具
+PKU智慧场馆自动预约工具
 
-## 部分代码和这个README引用自大佬的自动报备项目 https://github.com/Bruuuuuuce/PKUAutoSubmit
+部分代码和这个README引用自大佬的自动报备项目 https://github.com/Bruuuuuuce/PKUAutoSubmit
 
-## 感谢同学们的支持，祝大家一切顺利，学业有成！
+感谢同学们的支持，祝大家一切顺利，学业有成！
 ## 注意这是会自动付款的！！！付款方式是校园卡，所以如果只是试一试的话，要记得手动取消预约退款！！！
 ## 如果校园卡余额不足也是会预约失败的
 
