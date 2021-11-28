@@ -16,7 +16,8 @@ PKU智慧场馆自动预约工具
 - 采用定时任务可实现定期（如每周）免打扰预约
 - 第三方依赖包几乎只有 `selenium` 一个
 - 由于我只测试过羽毛球场的预约，其他场馆只是理论上可行，如果出现任何问题，可以提issue
-- 目前不支持时间上的“或”规则，也不支持多人多项目，以后可能会更新
+- 目前不支持多人多项目，以后可能会更新
+- 支持时间上的“或”选项，支持按照星期几设定时间
 - 定时任务还未经过完全测试
 - 部分代码和这个README引用自大佬的自动出入校报备项目 https://github.com/Bruuuuuuce/PKUAutoSubmit
 - 注意这是会自动付款的！！！付款方式是校园卡，所以如果只是试一试的话，要记得手动取消预约退款！！！
@@ -77,6 +78,11 @@ pip3 install selenium==2.48.0
 [Apache License 2.0](https://github.com/Bruuuuuuce/PKUAutoSubmit/blob/main/LICENSE)
 
 ## 版本历史
+
+### version 1.1
+
+- 发布于 2021.11.28
+- 修改时间选项
 
 ### version 1.0
 
