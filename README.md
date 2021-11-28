@@ -47,7 +47,7 @@ pip3 install selenium==2.48.0
 
 2. 用文本编辑器（建议代码编辑器）打开 `config0.ini` 文件
 
-3. 配置 `[login]` 、`[type]` 、`[time]`、`[wechat_notice]` 这几个 Section 下的变量，在 `config.ini` 文件内有详细注释
+3. 配置 `[login]` 、`[type]` 、`[time]`、`[wechat_notice]` 这几个 Section 下的变量，在 `config0.ini.sample` 文件内有详细注释
 
 
 ## 定时运行
@@ -68,7 +68,7 @@ pip3 install selenium==2.48.0
 
 ## 微信推送
 
-本项目支持基于[Server酱](https://sct.ftqq.com/)的微信推送功能，仅需登录并扫码绑定，之后将获取到的 SCKEY 填入 `config.ini` 文件即可
+本项目支持基于[Server酱](https://sct.ftqq.com/)的微信推送功能，仅需登录并扫码绑定，之后将获取到的 SCKEY 填入 `config0.ini` 文件即可
 
 ## 责任须知
 
@@ -76,14 +76,14 @@ pip3 install selenium==2.48.0
 
 ## 证书
 
-[Apache License 2.0](https://github.com/Bruuuuuuce/PKUAutoSubmit/blob/main/LICENSE)
+[Apache License 2.0](https://github.com/yanyuandaxia/PKUAutoBookingVenues/blob/main/LICENSE)
 
 ## 版本历史
 
 ### version 1.1
 
 - 发布于 2021.11.28
-- 修改时间选项
+- 修改时间选项，增加“与”、“或”关系和多用户配置
 
 ### version 1.0
 
