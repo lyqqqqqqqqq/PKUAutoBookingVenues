@@ -67,27 +67,6 @@ def click_agree(driver):
 
 def book(driver, start_time, end_time):
     print("查找空闲场地")
-    driver.switch_to.window(driver.window_handles[-1])
-    WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
-
-    today = datetime.datetime.today()
-    today = datetime.datetime.strptime(str(today)[:10], "%Y-%m-%d")
-    date = datetime.datetime.strptime(start_time[:8], "%Y%m%d")
-    print("日期：", str(date).split()[0])
-    delta_day = (date-today).days
-    # print(delta_day)
-    if delta_day > 3:
-        print("只能预约3天以内的场馆")
-    for i in range(delta_day):
-        driver.find_element_by_xpath(
-            '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
-        time.sleep(2)
-
-    start_time = datetime.datetime.strptime(start_time[8:], "%H%M")
-    end_time = datetime.datetime.strptime(end_time[8:], "%H%M")
-    print("开始时间：%s" % str(start_time).split()[1])
-    print("结束时间：%s" % str(end_time).split()[1])
 
     def judge_in_time_range(venue_time_range):
         vt = venue_time_range.split('-')
@@ -126,20 +105,57 @@ def book(driver, start_time, end_time):
                 return True
         return False
 
-    status = click_free()
-    while not status:
-        next_table = driver.find_elements_by_xpath(
-            '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i')
-        if len(next_table) > 0:
-            driver.find_element_by_xpath(
-                '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
-            status = click_free()
+    driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
+
+    start_time_list = start_time.split('/')
+    end_time_list = end_time.split('/')
+    print(start_time_list, end_time_list)
+    now = datetime.datetime.today()
+    today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
+
+    for k in range(len(start_time_list)):
+        start_time = start_time_list[k]
+        end_time = end_time_list[k]
+        if len(start_time) > 8:
+            date = datetime.datetime.strptime(
+                start_time.split('-')[0], "%Y%m%d")
+            delta_day = (date-today).days
         else:
-            break
-    if status:
-        print("找到空闲场地")
-    else:
-        print("没有空余场地")
+            delta_day = (int(start_time[0])+6-today.weekday()) % 7
+            date = today+datetime.timedelta(days=delta_day)
+        print("日期：", str(date).split()[0])
+
+        # print(delta_day)
+        if delta_day > 3:
+            print("只能预约3天以内的场馆")
+        for i in range(delta_day):
+            driver.find_element_by_xpath(
+                '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
+            time.sleep(2)
+
+        start_time = datetime.datetime.strptime(
+            start_time.split('-')[1], "%H%M")
+        end_time = datetime.datetime.strptime(end_time.split('-')[1], "%H%M")
+        print("开始时间：%s" % str(start_time).split()[1])
+        print("结束时间：%s" % str(end_time).split()[1])
+
+        status = click_free()
+        while not status:
+            next_table = driver.find_elements_by_xpath(
+                '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i')
+            if len(next_table) > 0:
+                driver.find_element_by_xpath(
+                    '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
+                status = click_free()
+            else:
+                break
+        if status:
+            print("找到空闲场地")
+            return status
+        else:
+            print("没有空余场地")
     return status
 
 
