@@ -130,6 +130,7 @@ def book(driver, start_time, end_time):
         # print(delta_day)
         if delta_day > 3:
             print("只能预约3天以内的场馆")
+            return False
         for i in range(delta_day):
             driver.find_element_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()

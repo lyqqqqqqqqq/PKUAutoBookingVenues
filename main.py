@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import warnings
 import sys
+import re
 from env_check import *
 from page_func import *
 from notice import *
@@ -37,9 +38,9 @@ def load_config(config):
     return (user_name, password, venue, start_time, end_time, wechat_notice, sckey)
 
 
-def page():
+def page(config):
     user_name, password, venue, start_time, end_time, wechat_notice, sckey = load_config(
-        'config.ini')
+        config)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(
@@ -65,11 +66,11 @@ def page():
     return status
 
 
-def run(run_times=3):
+def run(config, run_times=3):
     env_check()
     for i in range(run_times):
         try:
-            status = page()
+            status = page(config)
             if status:
                 break
         except:
@@ -77,4 +78,11 @@ def run(run_times=3):
 
 
 if __name__ == '__main__':
-    run()
+
+    lst_conf = env_check()
+    print(lst_conf)
+    print('读取到%d份配置文件\n' % len(lst_conf))
+
+    for num, config in enumerate(lst_conf):
+        print('||第%d个预约||' % num+1)
+        run(config)
