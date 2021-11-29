@@ -3,11 +3,6 @@ PKU智慧场馆自动预约工具
 
 部分代码和这个README引用自大佬的自动报备项目 https://github.com/Bruuuuuuce/PKUAutoSubmit
 
-感谢同学们的支持，祝大家一切顺利，学业有成！
-## 注意这是会自动付款的！！！付款方式是校园卡，所以如果只是试一试的话，要记得手动取消预约退款！！！
-## 如果校园卡余额不足也是会预约失败的
-
-是我的第一个 `selenium` 练手小项目，完善程度较低，欢迎任意类型的使用与开发改进
 
 ## 说明
 
@@ -18,6 +13,7 @@ PKU智慧场馆自动预约工具
 - 由于我只测试过羽毛球场的预约，其他场馆只是理论上可行，如果出现任何问题，可以提issue
 - 支持时间上的“或”关系，支持按照星期几设定时间
 - 时间上的“与”关系可通过设置多份`config[0-9][0-9].ini`文件实现
+- 默认并行处理所有config，如果要更改为按顺序执行，请在`main.py`中注释`muilti_run(lst_config)`，并取消注释`sequence_run(lst_config)`
 - 定时任务还未经过完全测试
 - 部分代码和这个README引用自大佬的自动出入校报备项目 https://github.com/Bruuuuuuce/PKUAutoSubmit
 - 注意这是会自动付款的！！！付款方式是校园卡，所以如果只是试一试的话，要记得手动取消预约退款！！！
@@ -79,6 +75,11 @@ pip3 install selenium==2.48.0
 [Apache License 2.0](https://github.com/yanyuandaxia/PKUAutoBookingVenues/blob/main/LICENSE)
 
 ## 版本历史
+
+### version 1.2
+
+- 发布于 2021.11.29
+- 增加并行预约功能
 
 ### version 1.1
 

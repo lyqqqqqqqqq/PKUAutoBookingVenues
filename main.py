@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import warnings
 import sys
-import re
+import multiprocessing as mp
 from env_check import *
 from page_func import *
 from notice import *
@@ -77,12 +77,26 @@ def run(config, run_times=3):
             pass
 
 
+def sequence_run(lst_conf):
+    print("按序预约")
+    for config in lst_conf:
+        print("booking %s" % config)
+        run(config)
+
+
+def multi_run(lst_conf):
+    print("并行预约")
+    pool = mp.Pool()
+    pool.map_async(run, lst_conf)
+    pool.close()
+    pool.join()
+
+
 if __name__ == '__main__':
 
     lst_conf = env_check()
     print(lst_conf)
     print('读取到%d份配置文件\n' % len(lst_conf))
 
-    for num, config in enumerate(lst_conf):
-        print('||第%d个预约||' % num+1)
-        run(config)
+    multi_run(lst_conf)
+    # sequence_run(lst_conf)
