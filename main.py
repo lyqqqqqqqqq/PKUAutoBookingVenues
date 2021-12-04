@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+from os import stat
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import warnings
@@ -41,6 +42,12 @@ def load_config(config):
 def page(config):
     user_name, password, venue, start_time, end_time, wechat_notice, sckey = load_config(
         config)
+    start_time_list_new, end_time_list_new, delta_day_list = judge_exceeds_days_limit(
+        start_time, end_time)
+    if len(start_time_list_new) == 0:
+        log_status(config, [start_time_list_new,
+                   end_time_list_new], 'exceeds 3 days')
+        return False
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(
@@ -51,17 +58,22 @@ def page(config):
 
     login(driver, user_name, password, retry=0)
     go_to_venue(driver, venue)
-    status = book(driver, start_time, end_time)
+    status = book(driver, start_time_list_new,
+                  end_time_list_new, delta_day_list)
     if status:
         click_agree(driver)
         click_book(driver)
-        click_submit_order(driver)
-        click_pay(driver)
-        if wechat_notice:
-            wechat_notification(user_name, venue, sckey)
-        status = True
+        try:
+            click_submit_order(driver)
+            click_pay(driver)
+            if wechat_notice:
+                wechat_notification(user_name, venue, sckey)
+            status = 'book success'
+        except:
+            status = 'already booked / pay failed'
     else:
-        status = False
+        status = 'no free area'
+    log_status(config, [start_time_list_new, end_time_list_new], status)
     driver.quit()
     return status
 

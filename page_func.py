@@ -65,55 +65,16 @@ def click_agree(driver):
     # <label data-v-97852f88="" class="text-left ivu-checkbox-wrapper ivu-checkbox-wrapper-checked ivu-checkbox-default"><span class="ivu-checkbox ivu-checkbox-checked"><span class="ivu-checkbox-inner"></span> <input type="checkbox" class="ivu-checkbox-input"></span>  已阅读并同意 </label>
 
 
-def book(driver, start_time, end_time):
-    print("查找空闲场地")
-
-    def judge_in_time_range(venue_time_range):
-        vt = venue_time_range.split('-')
-        vt_start_time = datetime.datetime.strptime(vt[0], "%H:%M")
-        vt_end_time = datetime.datetime.strptime(vt[1], "%H:%M")
-        # print(vt_start_time <= start_time)
-        # print(vt_end_time >= end_time)
-        if start_time <= vt_start_time and vt_end_time <= end_time:
-            return True
-        else:
-            return False
-
-    def click_free():
-        trs = driver.find_elements_by_tag_name('tr')
-        trs_list = []
-        for i in range(1, len(trs)-2):
-            vt = trs[i].find_elements_by_tag_name(
-                'td')[0].find_element_by_tag_name('div').text
-            if judge_in_time_range(vt):
-                trs_list.append(trs[i].find_elements_by_tag_name(
-                    'td'))
-        if len(trs_list) == 0:
-            return False
-        for j in range(1, len(trs_list[0])):
-            flag = True
-            for i in range(len(trs_list)):
-                class_name = trs_list[i][j].find_element_by_tag_name(
-                    'div').get_attribute("class")
-                if class_name.split()[2] == 'reserved':
-                    flag = False
-                    break
-            if flag:
-                for i in range(len(trs_list)):
-                    trs_list[i][j].find_element_by_tag_name(
-                        'div').click()
-                return True
-        return False
-
-    driver.switch_to.window(driver.window_handles[-1])
-    WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
-
+def judge_exceeds_days_limit(start_time, end_time):
     start_time_list = start_time.split('/')
     end_time_list = end_time.split('/')
     print(start_time_list, end_time_list)
     now = datetime.datetime.today()
     today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
+
+    start_time_list_new = []
+    end_time_list_new = []
+    delta_day_list = []
 
     for k in range(len(start_time_list)):
         start_time = start_time_list[k]
@@ -130,7 +91,63 @@ def book(driver, start_time, end_time):
         # print(delta_day)
         if delta_day > 3:
             print("只能预约3天以内的场馆")
+            break
+        else:
+            start_time_list_new.append(start_time)
+            end_time_list_new.append(end_time)
+            delta_day_list.append(delta_day)
+    return start_time_list_new, end_time_list_new, delta_day_list
+
+
+def book(driver, start_time_list, end_time_list, delta_day_list):
+    print("查找空闲场地")
+
+    def judge_in_time_range(start_time, end_time, venue_time_range):
+        vt = venue_time_range.split('-')
+        vt_start_time = datetime.datetime.strptime(vt[0], "%H:%M")
+        vt_end_time = datetime.datetime.strptime(vt[1], "%H:%M")
+        # print(vt_start_time <= start_time)
+        # print(vt_end_time >= end_time)
+        if start_time <= vt_start_time and vt_end_time <= end_time:
+            return True
+        else:
             return False
+
+    def click_free(start_time, end_time):
+        trs = driver.find_elements_by_tag_name('tr')
+        trs_list = []
+        for i in range(1, len(trs)-2):
+            vt = trs[i].find_elements_by_tag_name(
+                'td')[0].find_element_by_tag_name('div').text
+            if judge_in_time_range(start_time, end_time, vt):
+                trs_list.append(trs[i].find_elements_by_tag_name(
+                    'td'))
+        if len(trs_list) == 0:
+            return False
+        for j in range(1, len(trs_list[0])):
+            flag = False
+            for i in range(len(trs_list)):
+                class_name = trs_list[i][j].find_element_by_tag_name(
+                    'div').get_attribute("class")
+                if class_name.split()[2] == 'free':
+                    flag = True
+                    break
+            if flag:
+                for i in range(len(trs_list)):
+                    trs_list[i][j].find_element_by_tag_name(
+                        'div').click()
+                return True
+        return False
+
+    driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
+
+    for k in range(len(start_time_list)):
+        start_time = start_time_list[k]
+        end_time = end_time_list[k]
+        delta_day = delta_day_list[k]
+
         for i in range(delta_day):
             driver.find_element_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
@@ -142,14 +159,15 @@ def book(driver, start_time, end_time):
         print("开始时间：%s" % str(start_time).split()[1])
         print("结束时间：%s" % str(end_time).split()[1])
 
-        status = click_free()
+        status = click_free(start_time, end_time)
+        # 如果第一页没有，就往后翻，直到不存在下一页
         while not status:
             next_table = driver.find_elements_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i')
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
-                status = click_free()
+                status = click_free(start_time, end_time)
             else:
                 break
         if status:
@@ -170,13 +188,13 @@ def click_book(driver):
 
 
 def click_submit_order(driver):
-    print("提交预约申请")
+    print("提交订单")
     driver.switch_to.window(driver.window_handles[-1])
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div/div/div[2]')))
-    time.sleep(3)
     driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div/div/div[2]').click()
+    #result = EC.alert_is_present()(driver)
 
 
 def click_pay(driver):
@@ -186,6 +204,14 @@ def click_pay(driver):
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[3]/div[7]/div[2]')))
     driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[3]/div[2]/div/div[3]/div[7]/div[2]').click()
+
+
+def log_status(config, start_time, status):
+    print("logging\n")
+    now = datetime.datetime.now()
+    with open('%s.log' % config.split('.')[0], 'a') as fw:
+        fw.write(str(now)+"\n")
+        fw.write("%s: %s\n" % (str(start_time), str(status)))
 
 
 if __name__ == '__main__':
