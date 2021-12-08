@@ -15,3 +15,4 @@ def wechat_notification(user_name, venue, sckey):
             print('微信通知成功！')
         else:
             print(str(response['errno']) + ' error: ' + response['errmsg'])
+    return "微信通知成功！\n"

@@ -42,11 +42,15 @@ def load_config(config):
 def page(config):
     user_name, password, venue, start_time, end_time, wechat_notice, sckey = load_config(
         config)
-    start_time_list_new, end_time_list_new, delta_day_list = judge_exceeds_days_limit(
+
+    log_str = ""
+    status = True
+    start_time_list_new, end_time_list_new, delta_day_list, log_exceeds = judge_exceeds_days_limit(
         start_time, end_time)
+    log_str += log_exceeds
     if len(start_time_list_new) == 0:
         log_status(config, [start_time_list_new,
-                   end_time_list_new], 'exceeds 3 days')
+                   end_time_list_new], log_exceeds)
         return False
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -56,43 +60,66 @@ def page(config):
         service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'])
     print('Driver Launched\n')
 
-    login(driver, user_name, password, retry=0)
-    go_to_venue(driver, venue)
-    status = book(driver, start_time_list_new,
-                  end_time_list_new, delta_day_list)
-    if status:
-        click_agree(driver)
-        click_book(driver)
+    try:
+        log_str += login(driver, user_name, password, retry=0)
+    except:
+        log_str += "登录失败\n"
+    try:
+        log_str += go_to_venue(driver, venue)
+    except:
+        log_str += "进入预约 %s 界面失败\n" % venue
+    status_book, log_book = book(driver, start_time_list_new,
+                                 end_time_list_new, delta_day_list)
+    log_str += log_book
+
+    if status_book:
         try:
-            click_submit_order(driver)
-            click_pay(driver)
-            if wechat_notice:
-                wechat_notification(user_name, venue, sckey)
-            status = 'book success'
+            log_str += click_agree(driver)
         except:
-            status = 'already booked / pay failed'
+            log_str += "点击同意失败\n"
+            status = False
+        if status:
+            try:
+                log_str += click_book(driver)
+            except:
+                log_str += "确定预约失败\n"
+                status = False
+        if status:
+            try:
+                log_str += click_submit_order(driver)
+            except:
+                log_str += "提交订单失败\n"
+                status = False
+        if status:
+            try:
+                log_str += click_pay(driver)
+            except:
+                log_str += "付款失败\n"
+                status = False
+        if status and wechat_notice:
+            try:
+                log_str += wechat_notification(user_name, venue, sckey)
+            except:
+                log_str += "微信通知失败\n"
     else:
-        status = 'no free area'
-    log_status(config, [start_time_list_new, end_time_list_new], status)
+        status = False
     driver.quit()
+    log_status(config, [start_time_list_new, end_time_list_new], log_str)
     return status
 
 
 def run(config, run_times=3):
     env_check()
     for i in range(run_times):
-        try:
-            status = page(config)
-            if status:
-                break
-        except:
-            pass
+        status = page(config)
+        if status:
+            break
 
 
 def sequence_run(lst_conf):
     print("按序预约")
     for config in lst_conf:
-        print("booking %s" % config)
+        print("预约 %s" % config)
         run(config)
 
 
