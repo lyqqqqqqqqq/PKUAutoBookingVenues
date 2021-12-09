@@ -137,10 +137,9 @@ def multi_run(lst_conf):
 
 
 if __name__ == '__main__':
-    page('config2.ini')
-    # lst_conf = env_check()
-    # print(lst_conf)
-    # print('读取到%d份配置文件\n' % len(lst_conf))
+    lst_conf = env_check()
+    print(lst_conf)
+    print('读取到%d份配置文件\n' % len(lst_conf))
 
-    # multi_run(lst_conf)
-    # # sequence_run(lst_conf)
+    multi_run(lst_conf)
+    # sequence_run(lst_conf)
