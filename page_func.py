@@ -77,6 +77,7 @@ def click_agree(driver):
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CLASS_NAME, 'ivu-checkbox-wrapper')))
     driver.find_element_by_class_name('ivu-checkbox-wrapper').click()
+    print("点击同意成功\n")
     log_str += "点击同意成功\n"
     return log_str
 
@@ -163,15 +164,16 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                     'td'))
         if len(trs_list) == 0:
             return False
-
         # 随机点一列free的，防止每次都点第一列
         j_list = [x for x in range(1, len(trs_list[0]))]
         random.shuffle(j_list)
+        print(j_list)
         for j in j_list:
             flag = False
             for i in range(len(trs_list)):
                 class_name = trs_list[i][j].find_element_by_tag_name(
                     'div').get_attribute("class")
+                print(class_name)
                 if class_name.split()[2] == 'free':
                     flag = True
                     break
@@ -203,6 +205,10 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         end_time = end_time_list[k]
         delta_day = delta_day_list[k]
 
+        if k != 0:
+            driver.refresh()
+            time.sleep(0.2)
+
         for i in range(delta_day):
             driver.find_element_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
@@ -227,11 +233,11 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                 break
         if status:
             log_str += "找到空闲场地\n"
-            print(log_str)
-            return status
+            print("找到空闲场地\n")
+            return status, log_str
         else:
             log_str += "没有空余场地\n"
-            print(log_str)
+            print("没有空余场地\n")
     return status, log_str
 
 
@@ -253,7 +259,8 @@ def click_submit_order(driver):
     log_str = "提交订单\n"
     driver.switch_to.window(driver.window_handles[-1])
     WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div/div/div[2]')))
+        EC.visibility_of_element_located((By.CLASS_NAME, 'payHandleItem')))
+    time.sleep(0.1)
     driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div/div/div[2]').click()
     #result = EC.alert_is_present()(driver)

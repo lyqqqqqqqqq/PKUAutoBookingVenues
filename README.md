@@ -76,6 +76,11 @@ pip3 install selenium==2.48.0
 
 ## 版本历史
 
+### version 2.1
+
+- 发布于 2021.12.08
+- 修复bug
+
 ### version 2.0
 
 - 发布于 2021.12.08
