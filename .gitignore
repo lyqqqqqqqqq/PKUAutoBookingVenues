@@ -1,3 +1,4 @@
 *.ini
-run.bat
+__pycache__
 *.log
+run.bat
