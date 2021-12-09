@@ -49,8 +49,8 @@ def page(config):
         start_time, end_time)
     log_str += log_exceeds
     if len(start_time_list_new) == 0:
-        log_status(config, [start_time_list_new,
-                   end_time_list_new], log_exceeds)
+        log_status(config, [start_time.split('/'),
+                   end_time.split('/')], log_exceeds)
         return False
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -77,30 +77,35 @@ def page(config):
             log_str += click_agree(driver)
         except:
             log_str += "点击同意失败\n"
+            print("点击同意失败\n")
             status = False
         if status:
             try:
                 log_str += click_book(driver)
             except:
                 log_str += "确定预约失败\n"
+                print("确定预约失败\n")
                 status = False
         if status:
             try:
                 log_str += click_submit_order(driver)
             except:
                 log_str += "提交订单失败\n"
+                print("提交订单失败\n")
                 status = False
         if status:
             try:
                 log_str += click_pay(driver)
             except:
                 log_str += "付款失败\n"
+                print("付款失败\n")
                 status = False
         if status and wechat_notice:
             try:
                 log_str += wechat_notification(user_name, venue, sckey)
             except:
                 log_str += "微信通知失败\n"
+                print("微信通知失败\n")
     else:
         status = False
     driver.quit()
@@ -132,10 +137,10 @@ def multi_run(lst_conf):
 
 
 if __name__ == '__main__':
+    page('config2.ini')
+    # lst_conf = env_check()
+    # print(lst_conf)
+    # print('读取到%d份配置文件\n' % len(lst_conf))
 
-    lst_conf = env_check()
-    print(lst_conf)
-    print('读取到%d份配置文件\n' % len(lst_conf))
-
-    multi_run(lst_conf)
-    # sequence_run(lst_conf)
+    # multi_run(lst_conf)
+    # # sequence_run(lst_conf)
