@@ -33,12 +33,12 @@ def login(driver, user_name, password, retry=0):
     try:
         WebDriverWait(driver,
                       5).until(EC.visibility_of_element_located((By.ID, 'all')))
-        print('门户登录成功！')
-        return '门户登录成功！\n'
+        print('门户登录成功!')
+        return '门户登录成功!\n'
     except:
         print('Retrying...')
         login(driver, user_name, password, retry + 1)
-    return '门户登录失败！\n'
+    return '门户登录失败!\n'
 
 
 def go_to_venue(driver, venue, retry=0):
@@ -92,6 +92,8 @@ def judge_exceeds_days_limit(start_time, end_time):
         str(now).split()[1][:-7], "%H:%M:%S")
     time_11_59 = datetime.datetime.strptime(
         "11:59:00", "%H:%M:%S")
+    time_11_59 = datetime.datetime.strptime(
+        "16:16:00", "%H:%M:%S")
 
     start_time_list_new = []
     end_time_list_new = []
@@ -107,7 +109,7 @@ def judge_exceeds_days_limit(start_time, end_time):
         else:
             delta_day = (int(start_time[0])+6-today.weekday()) % 7
             date = today+datetime.timedelta(days=delta_day)
-        print("日期：", str(date).split()[0])
+        print("日期:", str(date).split()[0])
 
         # print(delta_day)
         if delta_day > 3 or (delta_day == 3 and time_hour < time_11_59):
@@ -135,6 +137,10 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
             "11:59:00", "%H:%M:%S")
         time_12 = datetime.datetime.strptime(
             "12:00:00", "%H:%M:%S")
+        time_11_59 = datetime.datetime.strptime(
+            "16:16:00", "%H:%M:%S")
+        time_12 = datetime.datetime.strptime(
+            "16:17:00", "%H:%M:%S")
         if time_hour < time_11_59:
             return 0
         elif time_11_59 < time_hour < time_12:
@@ -217,8 +223,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         start_time = datetime.datetime.strptime(
             start_time.split('-')[1], "%H%M")
         end_time = datetime.datetime.strptime(end_time.split('-')[1], "%H%M")
-        print("开始时间：%s" % str(start_time).split()[1])
-        print("结束时间：%s" % str(end_time).split()[1])
+        print("开始时间:%s" % str(start_time).split()[1])
+        print("结束时间:%s" % str(end_time).split()[1])
 
         status = click_free(start_time, end_time)
         # 如果第一页没有，就往后翻，直到不存在下一页
