@@ -113,25 +113,17 @@ def page(config):
     return status
 
 
-def run(config, run_times=3):
-    env_check()
-    for i in range(run_times):
-        status = page(config)
-        if status:
-            break
-
-
 def sequence_run(lst_conf):
     print("按序预约")
     for config in lst_conf:
         print("预约 %s" % config)
-        run(config)
+        page(config)
 
 
 def multi_run(lst_conf):
     print("并行预约")
     pool = mp.Pool()
-    pool.map_async(run, lst_conf)
+    pool.map_async(page, lst_conf)
     pool.close()
     pool.join()
 
