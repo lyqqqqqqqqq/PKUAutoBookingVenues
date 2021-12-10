@@ -12,7 +12,7 @@ def wechat_notification(user_name, venue, sckey):
                   safe='/:?=&')) as response:
         response = json.loads(response.read().decode('utf-8'))
         if response['code'] == 0 and response['data']['error'] == 'SUCCESS':
-            print('微信通知成功！')
+            print('微信通知成功')
         else:
             print(str(response['errno']) + ' error: ' + response['errmsg'])
-    return "微信通知成功！\n"
+    return "微信通知成功\n"

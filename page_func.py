@@ -33,12 +33,12 @@ def login(driver, user_name, password, retry=0):
     try:
         WebDriverWait(driver,
                       5).until(EC.visibility_of_element_located((By.ID, 'all')))
-        print('门户登录成功!')
-        return '门户登录成功!\n'
+        print('门户登录成功')
+        return '门户登录成功\n'
     except:
         print('Retrying...')
         login(driver, user_name, password, retry + 1)
-    return '门户登录失败!\n'
+    return '门户登录失败\n'
 
 
 def go_to_venue(driver, venue, retry=0):
@@ -92,8 +92,8 @@ def judge_exceeds_days_limit(start_time, end_time):
         str(now).split()[1][:-7], "%H:%M:%S")
     time_11_59 = datetime.datetime.strptime(
         "11:59:00", "%H:%M:%S")
-    time_11_59 = datetime.datetime.strptime(
-        "16:16:00", "%H:%M:%S")
+    # time_11_59 = datetime.datetime.strptime(
+    #     str(now).split()[1][:-7], "%H:%M:%S")
 
     start_time_list_new = []
     end_time_list_new = []
@@ -137,10 +137,9 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
             "11:59:00", "%H:%M:%S")
         time_12 = datetime.datetime.strptime(
             "12:00:00", "%H:%M:%S")
-        time_11_59 = datetime.datetime.strptime(
-            "16:16:00", "%H:%M:%S")
-        time_12 = datetime.datetime.strptime(
-            "16:17:00", "%H:%M:%S")
+        # time_11_59 = datetime.datetime.strptime(
+        #     str(now).split()[1][:-7], "%H:%M:%S")
+        # time_12 = time_11_59+datetime.timedelta(minutes=1)
         if time_hour < time_11_59:
             return 0
         elif time_11_59 < time_hour < time_12:
