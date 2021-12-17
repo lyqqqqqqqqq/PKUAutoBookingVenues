@@ -75,6 +75,15 @@ pip3 install selenium==2.48.0
 [Apache License 2.0](https://github.com/yanyuandaxia/PKUAutoBookingVenues/blob/main/LICENSE)
 
 ## 版本历史
+### version 2.3
+
+- 发布于 2021.12.17
+- 增加Firefox支持，增加稳定性，优化速度，优化提醒消息
+
+### version 2.2
+
+- 发布于 2021.12.10
+- 增加调试代码，取消多次运行（现可通过计划任务实现）
 
 ### version 2.1
 

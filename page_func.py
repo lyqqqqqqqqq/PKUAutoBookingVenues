@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 
 def login(driver, user_name, password, retry=0):
     if retry == 3:
-        raise Exception('门户登录失败')
+        return '门户登录失败\n'
 
     print('门户登录中...')
 
@@ -23,12 +23,16 @@ def login(driver, user_name, password, retry=0):
     driver.get('https://portal.pku.edu.cn/portal2017/')
     driver.get(
         f'{iaaaUrl}?appID={appID}&appName={appName}&redirectUrl={redirectUrl}')
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 5).until(
         EC.visibility_of_element_located((By.ID, 'logon_button')))
     driver.find_element_by_id('user_name').send_keys(user_name)
-    time.sleep(0.1)
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     driver.find_element_by_id('password').send_keys(password)
-    time.sleep(0.1)
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     driver.find_element_by_id('logon_button').click()
     try:
         WebDriverWait(driver,
@@ -38,42 +42,54 @@ def login(driver, user_name, password, retry=0):
     except:
         print('Retrying...')
         login(driver, user_name, password, retry + 1)
-    return '门户登录失败\n'
 
 
 def go_to_venue(driver, venue, retry=0):
     if retry == 3:
-        print("进入智慧场馆界面失败")
-        log_str = "进入智慧场馆界面失败\n"
+        print("进入预约 %s 界面失败" % venue)
+        log_str = "进入预约 %s 界面失败\n" % venue
+        return False, log_str
 
     print("进入预约 %s 界面" % venue)
     log_str = "进入预约 %s 界面\n" % venue
+
     try:
         butt_all = driver.find_element_by_id('all')
         driver.execute_script('arguments[0].click();', butt_all)
+        WebDriverWait(driver, 10).until_not(
+            EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.ID, 'venues')))
         driver.find_element_by_id('venues').click()
         while len(driver.window_handles) < 2:
-            time.sleep(1)
+            time.sleep(0.5)
         driver.switch_to.window(driver.window_handles[-1])
+        WebDriverWait(driver, 10).until_not(
+            EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div[2]/div[2]")))
         driver.find_element_by_xpath(
             "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div[2]/div[2]").click()
+        WebDriverWait(driver, 10).until_not(
+            EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, 'venueDetailBottomItem')))
+            EC.visibility_of_element_located((By.XPATH, '//div [contains(text(),\'%s\')]' % venue)))
         driver.find_element_by_xpath(
             '//div [contains(text(),\'%s\')]' % venue).click()
+        status = True
         log_str += "进入预约 %s 界面成功\n" % venue
     except:
         print("retrying")
-        go_to_venue(driver, venue, retry + 1)
-    return log_str
+        status, log_str = go_to_venue(driver, venue, retry + 1)
+    return status, log_str
 
 
 def click_agree(driver):
     print("点击同意")
     log_str = "点击同意\n"
     driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CLASS_NAME, 'ivu-checkbox-wrapper')))
     driver.find_element_by_class_name('ivu-checkbox-wrapper').click()
@@ -190,6 +206,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         return False
 
     driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
 
@@ -203,7 +221,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
             else:
                 time.sleep(1)
         driver.refresh()
-        time.sleep(0.2)
+        WebDriverWait(driver, 10).until_not(
+            EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
 
     for k in range(len(start_time_list)):
         start_time = start_time_list[k]
@@ -212,12 +231,12 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
 
         if k != 0:
             driver.refresh()
-            time.sleep(0.2)
 
         for i in range(delta_day):
+            WebDriverWait(driver, 10).until_not(
+                EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
             driver.find_element_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
-            time.sleep(0.2)
 
         start_time = datetime.datetime.strptime(
             start_time.split('-')[1], "%H%M")
@@ -230,6 +249,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         while not status:
             next_table = driver.find_elements_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i')
+            WebDriverWait(driver, 10).until_not(
+                EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
@@ -239,17 +260,22 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         if status:
             log_str += "找到空闲场地\n"
             print("找到空闲场地\n")
-            return status, log_str
+            now = datetime.datetime.now()
+            today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
+            date = today+datetime.timedelta(days=delta_day)
+            return status, log_str, str(date)[:10]+str(start_time)[10:], str(date)[:10]+str(end_time)[10:]
         else:
             log_str += "没有空余场地\n"
             print("没有空余场地\n")
-    return status, log_str
+    return status, log_str, None, None
 
 
 def click_book(driver):
     print("确定预约")
     log_str = "确定预约\n"
     driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[5]/div/div[2]')))
     driver.find_element_by_xpath(
@@ -263,9 +289,10 @@ def click_submit_order(driver):
     print("提交订单")
     log_str = "提交订单\n"
     driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CLASS_NAME, 'payHandleItem')))
-    time.sleep(0.1)
     driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div/div/div[2]').click()
     #result = EC.alert_is_present()(driver)
@@ -278,6 +305,8 @@ def click_pay(driver):
     print("付款（校园卡）")
     log_str = "付款（校园卡）\n"
     driver.switch_to.window(driver.window_handles[-1])
+    WebDriverWait(driver, 10).until_not(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[3]/div[7]/div[2]')))
     driver.find_element_by_xpath(
@@ -285,16 +314,6 @@ def click_pay(driver):
     print("付款成功")
     log_str += "付款成功\n"
     return log_str
-
-
-def log_status(config, start_time, log_str):
-    print("记录日志")
-    now = datetime.datetime.now()
-    with open('%s.log' % config.split('.')[0], 'a', encoding='utf-8') as fw:
-        fw.write(str(now)+"\n")
-        fw.write("%s\n" % str(start_time))
-        fw.write(log_str+"\n")
-    print("记录日志成功")
 
 
 if __name__ == '__main__':

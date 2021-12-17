@@ -5,9 +5,6 @@ import re
 
 
 def env_check():
-    if sys.version_info < (3, 6):
-        raise OSError('请至少使用 Python 3.6 及以上版本，建议使用 Python 3.7 及以上版本')
-
     try:
         import selenium
     except ImportError:
