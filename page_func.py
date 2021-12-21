@@ -27,12 +27,15 @@ def login(driver, user_name, password, retry=0):
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 5).until(
         EC.visibility_of_element_located((By.ID, 'logon_button')))
+    time.sleep(0.2)
     driver.find_element_by_id('user_name').send_keys(user_name)
     WebDriverWait(driver, 10).until_not(
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+    time.sleep(0.2)
     driver.find_element_by_id('password').send_keys(password)
     WebDriverWait(driver, 10).until_not(
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+    time.sleep(0.2)
     driver.find_element_by_id('logon_button').click()
     try:
         WebDriverWait(driver,
@@ -60,6 +63,7 @@ def go_to_venue(driver, venue, retry=0):
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.ID, 'venues')))
+        time.sleep(0.5)
         driver.find_element_by_id('venues').click()
         while len(driver.window_handles) < 2:
             time.sleep(0.5)
@@ -67,9 +71,9 @@ def go_to_venue(driver, venue, retry=0):
         WebDriverWait(driver, 10).until_not(
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div[2]/div[2]")))
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[3]/div/div[3]/div[1]/div[2]")))
         driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div[2]/div[2]").click()
+            "/html/body/div[1]/div/div/div[3]/div/div[3]/div[1]/div[2]").click()
         WebDriverWait(driver, 10).until_not(
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(

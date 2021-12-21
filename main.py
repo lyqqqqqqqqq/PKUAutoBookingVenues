@@ -95,12 +95,14 @@ def page(config, browser="chrome"):
             log_str += "登录失败\n"
             status = False
     if status:
-        try:
-            status, log_venue = go_to_venue(driver, venue)
-            log_str += log_venue
-        except:
-            log_str += "进入预约 %s 界面失败\n" % venue
-            status = False
+        status, log_venue = go_to_venue(driver, venue)
+        log_str += log_venue
+        # try:
+        #     status, log_venue = go_to_venue(driver, venue)
+        #     log_str += log_venue
+        # except:
+        #     log_str += "进入预约 %s 界面失败\n" % venue
+        #     status = False
     if status:
         status, log_book, start_time, end_time = book(driver, start_time_list_new,
                                                       end_time_list_new, delta_day_list)
@@ -177,4 +179,4 @@ if __name__ == '__main__':
 
     multi_run(lst_conf, browser)
     # sequence_run(lst_conf, browser)
-    # page('config2.ini', browser)
+    # page('config1.ini', browser)
