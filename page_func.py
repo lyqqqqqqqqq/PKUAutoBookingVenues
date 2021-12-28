@@ -78,6 +78,7 @@ def go_to_venue(driver, venue, retry=0):
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//div [contains(text(),\'%s\')]' % venue)))
+        time.sleep(0.5)
         driver.find_element_by_xpath(
             '//div [contains(text(),\'%s\')]' % venue).click()
         status = True
@@ -96,6 +97,7 @@ def click_agree(driver):
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CLASS_NAME, 'ivu-checkbox-wrapper')))
+    driver.sleep(0.1)
     driver.find_element_by_class_name('ivu-checkbox-wrapper').click()
     print("点击同意成功\n")
     log_str += "点击同意成功\n"
@@ -130,9 +132,8 @@ def judge_exceeds_days_limit(start_time, end_time):
             delta_day = (int(start_time[0])+6-today.weekday()) % 7
             date = today+datetime.timedelta(days=delta_day)
         print("日期:", str(date).split()[0])
-
         # print(delta_day)
-        if delta_day > 3 or (delta_day == 3 and time_hour < time_11_59):
+        if delta_day > 3 or (delta_day == 3 and (time_hour < time_11_59)):
             print("只能在当天中午12:00后预约未来3天以内的场馆")
             log_str = "只能在当天中午12:00后预约未来3天以内的场馆\n"
             break
@@ -210,11 +211,11 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         return False
 
     driver.switch_to.window(driver.window_handles[-1])
+    time.sleep(0.5)
     WebDriverWait(driver, 10).until_not(
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/div/div[1]/div/div/input')))
-
     # 若接近但是没到12点，停留在此页面
     flag = judge_close_to_time_12()
     if flag == 1:
@@ -227,6 +228,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         driver.refresh()
         WebDriverWait(driver, 10).until_not(
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+        time.sleep(0.1)
 
     for k in range(len(start_time_list)):
         start_time = start_time_list[k]
@@ -235,12 +237,14 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
 
         if k != 0:
             driver.refresh()
+            time.sleep(0.5)
 
         for i in range(delta_day):
             WebDriverWait(driver, 10).until_not(
                 EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
             driver.find_element_by_xpath(
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
+            time.sleep(0.2)
 
         start_time = datetime.datetime.strptime(
             start_time.split('-')[1], "%H%M")
@@ -255,6 +259,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                 '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i')
             WebDriverWait(driver, 10).until_not(
                 EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+            time.sleep(0.1)
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
