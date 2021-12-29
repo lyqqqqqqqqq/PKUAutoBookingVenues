@@ -97,7 +97,7 @@ def click_agree(driver):
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CLASS_NAME, 'ivu-checkbox-wrapper')))
-    driver.sleep(0.1)
+    time.sleep(0.1)
     driver.find_element_by_class_name('ivu-checkbox-wrapper').click()
     print("点击同意成功\n")
     log_str += "点击同意成功\n"
