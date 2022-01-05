@@ -1,4 +1,5 @@
 *.ini
 __pycache__
 *.log
-run.bat
+run*.bat
+main*.py
