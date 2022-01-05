@@ -76,7 +76,8 @@ def page(config, browser="chrome"):
         chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(
             options=chrome_options,
-            executable_path=sys_path(browser="chrome"))
+            executable_path=sys_path(browser="chrome"),
+            service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'])
         print('chrome launched\n')
     elif browser == "firefox":
         firefox_options = Firefox_Options()
@@ -95,14 +96,12 @@ def page(config, browser="chrome"):
             log_str += "登录失败\n"
             status = False
     if status:
-        status, log_venue = go_to_venue(driver, venue)
-        log_str += log_venue
-        # try:
-        #     status, log_venue = go_to_venue(driver, venue)
-        #     log_str += log_venue
-        # except:
-        #     log_str += "进入预约 %s 界面失败\n" % venue
-        #     status = False
+        try:
+            status, log_venue = go_to_venue(driver, venue)
+            log_str += log_venue
+        except:
+            log_str += "进入预约 %s 界面失败\n" % venue
+            status = False
     if status:
         status, log_book, start_time, end_time = book(driver, start_time_list_new,
                                                       end_time_list_new, delta_day_list)
@@ -171,12 +170,13 @@ def multi_run(lst_conf, browser="chrome"):
 
 
 if __name__ == '__main__':
-    browser = "firefox"
+    browser = "chrome"
 
-    lst_conf = env_check()
-    print(lst_conf)
-    print('读取到%d份配置文件\n' % len(lst_conf))
-
-    multi_run(lst_conf, browser)
+    # lst_conf = env_check()
+    # print(lst_conf)
+    # multi_run(lst_conf, browser)
     # sequence_run(lst_conf, browser)
-    # page('config1.ini', browser)
+    for i in range(3):
+        status = page('config0.ini', browser)
+        if status:
+            break
