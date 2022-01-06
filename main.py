@@ -103,8 +103,8 @@ def page(config, browser="chrome"):
             log_str += "进入预约 %s 界面失败\n" % venue
             status = False
     if status:
-        status, log_book, start_time, end_time = book(driver, start_time_list_new,
-                                                      end_time_list_new, delta_day_list)
+        status, log_book, start_time, end_time, filed_num = book(driver, start_time_list_new,
+                                                                 end_time_list_new, delta_day_list)
         log_str += log_book
     else:
         log_str += "点击预约表格失败\n"
@@ -142,7 +142,7 @@ def page(config, browser="chrome"):
     if status and wechat_notice:
         try:
             log_str += wechat_notification(user_name,
-                                           venue, start_time, end_time, sckey)
+                                           venue, filed_num, start_time, end_time, sckey)
         except:
             log_str += "微信通知失败\n"
             print("微信通知失败\n")
@@ -170,13 +170,13 @@ def multi_run(lst_conf, browser="chrome"):
 
 
 if __name__ == '__main__':
-    browser = "chrome"
+    browser = "firefox"
 
     # lst_conf = env_check()
     # print(lst_conf)
     # multi_run(lst_conf, browser)
     # sequence_run(lst_conf, browser)
     for i in range(3):
-        status = page('config0.ini', browser)
+        status = page('config2.ini', browser)
         if status:
             break

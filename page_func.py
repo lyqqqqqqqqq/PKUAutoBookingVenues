@@ -172,15 +172,19 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         vt = venue_time_range.split('-')
         vt_start_time = datetime.datetime.strptime(vt[0], "%H:%M")
         vt_end_time = datetime.datetime.strptime(vt[1], "%H:%M")
-        # print(vt_start_time <= start_time)
-        # print(vt_end_time >= end_time)
         if start_time <= vt_start_time and vt_end_time <= end_time:
             return True
         else:
             return False
 
     def click_free(start_time, end_time):
+        filed_num = -9
         trs = driver.find_elements_by_tag_name('tr')
+        # 防止表格没加载出来
+        while trs[1].find_elements_by_tag_name(
+                'td')[0].find_element_by_tag_name('div').text == "时间段":
+            time.sleep(0.1)
+            trs = driver.find_elements_by_tag_name('tr')
         trs_list = []
         for i in range(1, len(trs)-2):
             vt = trs[i].find_elements_by_tag_name(
@@ -189,7 +193,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                 trs_list.append(trs[i].find_elements_by_tag_name(
                     'td'))
         if len(trs_list) == 0:
-            return False
+            return False, filed_num
         # 随机点一列free的，防止每次都点第一列
         j_list = [x for x in range(1, len(trs_list[0]))]
         random.shuffle(j_list)
@@ -202,13 +206,17 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                 print(class_name)
                 if class_name.split()[2] == 'free':
                     flag = True
+                    filed_num = j
                     break
             if flag:
                 for i in range(len(trs_list)):
+                    WebDriverWait(driver, 10).until_not(
+                        EC.visibility_of_element_located((By.CLASS_NAME,
+                                                          "loading.ivu-spin.ivu-spin-large.ivu-spin-fix.fade-leave-active.fade-leave-to")))
                     trs_list[i][j].find_element_by_tag_name(
                         'div').click()
-                return True
-        return False
+                return True, filed_num
+        return False, filed_num
 
     driver.switch_to.window(driver.window_handles[-1])
     time.sleep(0.5)
@@ -228,7 +236,6 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         driver.refresh()
         WebDriverWait(driver, 10).until_not(
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
-        time.sleep(0.1)
 
     for k in range(len(start_time_list)):
         start_time = start_time_list[k]
@@ -252,7 +259,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         print("开始时间:%s" % str(start_time).split()[1])
         print("结束时间:%s" % str(end_time).split()[1])
 
-        status = click_free(start_time, end_time)
+        status, filed_num = click_free(start_time, end_time)
         # 如果第一页没有，就往后翻，直到不存在下一页
         while not status:
             next_table = driver.find_elements_by_xpath(
@@ -263,20 +270,20 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
-                status = click_free(start_time, end_time)
+                status, filed_num = click_free(start_time, end_time)
             else:
                 break
         if status:
-            log_str += "找到空闲场地\n"
-            print("找到空闲场地\n")
+            log_str += "找到空闲场地，场地编号为%d\n" % filed_num
+            print("找到空闲场地，场地编号为%d\n" % filed_num)
             now = datetime.datetime.now()
             today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
             date = today+datetime.timedelta(days=delta_day)
-            return status, log_str, str(date)[:10]+str(start_time)[10:], str(date)[:10]+str(end_time)[10:]
+            return status, log_str, str(date)[:10]+str(start_time)[10:], str(date)[:10]+str(end_time)[10:], filed_num
         else:
             log_str += "没有空余场地\n"
             print("没有空余场地\n")
-    return status, log_str, None, None
+    return status, log_str, None, None, None
 
 
 def click_book(driver):
@@ -318,6 +325,7 @@ def click_pay(driver):
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[2]/div/div[3]/div[7]/div[2]')))
+    time.sleep(2)
     driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[3]/div[2]/div/div[3]/div[7]/div[2]').click()
     print("付款成功")

@@ -77,6 +77,11 @@ pip3 install selenium==2.48.0
 [Apache License 2.0](https://github.com/yanyuandaxia/PKUAutoBookingVenues/blob/main/LICENSE)
 
 ## 版本历史
+### version 2.5
+
+- 发布于 2022.1.6
+- 优化微信提醒内容，增加稳定性
+
 ### version 2.4
 
 - 发布于 2021.12.21
