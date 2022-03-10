@@ -112,9 +112,9 @@ def judge_exceeds_days_limit(start_time, end_time):
     today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
     time_hour = datetime.datetime.strptime(
         str(now).split()[1][:-7], "%H:%M:%S")
-    time_11_59 = datetime.datetime.strptime(
-        "11:59:00", "%H:%M:%S")
-    # time_11_59 = datetime.datetime.strptime(
+    time_11_55 = datetime.datetime.strptime(
+        "11:55:00", "%H:%M:%S")
+    # time_11_55 = datetime.datetime.strptime(
     #     str(now).split()[1][:-7], "%H:%M:%S")
 
     start_time_list_new = []
@@ -133,9 +133,9 @@ def judge_exceeds_days_limit(start_time, end_time):
             date = today+datetime.timedelta(days=delta_day)
         print("日期:", str(date).split()[0])
         # print(delta_day)
-        if delta_day > 3 or (delta_day == 3 and (time_hour < time_11_59)):
-            print("只能在当天中午12:00后预约未来3天以内的场馆")
-            log_str = "只能在当天中午12:00后预约未来3天以内的场馆\n"
+        if delta_day > 3 or (delta_day == 3 and (time_hour < time_11_55)):
+            print("只能在当天中午11:55后预约未来3天以内的场馆")
+            log_str = "只能在当天中午11:55后预约未来3天以内的场馆\n"
             break
         else:
             start_time_list_new.append(start_time)
@@ -146,7 +146,7 @@ def judge_exceeds_days_limit(start_time, end_time):
     return start_time_list_new, end_time_list_new, delta_day_list, log_str
 
 
-def book(driver, start_time_list, end_time_list, delta_day_list):
+def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
     print("查找空闲场地")
     log_str = "查找空闲场地\n"
 
@@ -154,16 +154,16 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         now = datetime.datetime.today()
         time_hour = datetime.datetime.strptime(
             str(now).split()[1][:-7], "%H:%M:%S")
-        time_11_59 = datetime.datetime.strptime(
-            "11:59:00", "%H:%M:%S")
+        time_11_55 = datetime.datetime.strptime(
+            "11:55:00", "%H:%M:%S")
         time_12 = datetime.datetime.strptime(
             "12:00:00", "%H:%M:%S")
-        # time_11_59 = datetime.datetime.strptime(
+        # time_11_55 = datetime.datetime.strptime(
         #     str(now).split()[1][:-7], "%H:%M:%S")
-        # time_12 = time_11_59+datetime.timedelta(minutes=1)
-        if time_hour < time_11_59:
+        # time_12 = time_11_55+datetime.timedelta(minutes=1)
+        if time_hour < time_11_55:
             return 0
-        elif time_11_59 < time_hour < time_12:
+        elif time_11_55 < time_hour < time_12:
             return 1
         elif time_hour > time_12:
             return 2
@@ -177,8 +177,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         else:
             return False
 
-    def click_free(start_time, end_time):
-        filed_num = -9
+    def click_free(start_time, end_time, venue_num):
         trs = driver.find_elements_by_tag_name('tr')
         # 防止表格没加载出来
         while trs[1].find_elements_by_tag_name(
@@ -193,30 +192,43 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
                 trs_list.append(trs[i].find_elements_by_tag_name(
                     'td'))
         if len(trs_list) == 0:
-            return False, filed_num
-        # 随机点一列free的，防止每次都点第一列
+            return False, -1
+
         j_list = [x for x in range(1, len(trs_list[0]))]
-        random.shuffle(j_list)
-        print(j_list)
-        for j in j_list:
+        if venue_num != -1 and (venue_num in j_list):
             flag = False
             for i in range(len(trs_list)):
-                class_name = trs_list[i][j].find_element_by_tag_name(
+                class_name = trs_list[i][venue_num].find_element_by_tag_name(
                     'div').get_attribute("class")
                 print(class_name)
                 if class_name.split()[2] == 'free':
                     flag = True
-                    filed_num = j
                     break
-            if flag:
+        elif venue_num != -1 and (venue_num not in j_list):
+            return False, venue_num
+        else:
+            # 随机点一列free的，防止每次都点第一列
+            random.shuffle(j_list)
+            print(j_list)
+            for j in j_list:
+                flag = False
                 for i in range(len(trs_list)):
-                    WebDriverWait(driver, 10).until_not(
-                        EC.visibility_of_element_located((By.CLASS_NAME,
-                                                          "loading.ivu-spin.ivu-spin-large.ivu-spin-fix.fade-leave-active.fade-leave-to")))
-                    trs_list[i][j].find_element_by_tag_name(
-                        'div').click()
-                return True, filed_num
-        return False, filed_num
+                    class_name = trs_list[i][j].find_element_by_tag_name(
+                        'div').get_attribute("class")
+                    print(class_name)
+                    if class_name.split()[2] == 'free':
+                        flag = True
+                        venue_num = j
+                        break
+        if flag:
+            for i in range(len(trs_list)):
+                WebDriverWait(driver, 10).until_not(
+                    EC.visibility_of_element_located((By.CLASS_NAME,
+                                                      "loading.ivu-spin.ivu-spin-large.ivu-spin-fix.fade-leave-active.fade-leave-to")))
+                trs_list[i][venue_num].find_element_by_tag_name(
+                    'div').click()
+            return True, venue_num
+        return False, venue_num
 
     driver.switch_to.window(driver.window_handles[-1])
     time.sleep(0.5)
@@ -259,7 +271,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
         print("开始时间:%s" % str(start_time).split()[1])
         print("结束时间:%s" % str(end_time).split()[1])
 
-        status, filed_num = click_free(start_time, end_time)
+        status, venue_num = click_free(start_time, end_time, venue_num)
         # 如果第一页没有，就往后翻，直到不存在下一页
         while not status:
             next_table = driver.find_elements_by_xpath(
@@ -270,16 +282,16 @@ def book(driver, start_time_list, end_time_list, delta_day_list):
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
-                status, filed_num = click_free(start_time, end_time)
+                status, venue_num = click_free(start_time, end_time, venue_num)
             else:
                 break
         if status:
-            log_str += "找到空闲场地，场地编号为%d\n" % filed_num
-            print("找到空闲场地，场地编号为%d\n" % filed_num)
+            log_str += "找到空闲场地，场地编号为%d\n" % venue_num
+            print("找到空闲场地，场地编号为%d\n" % venue_num)
             now = datetime.datetime.now()
             today = datetime.datetime.strptime(str(now)[:10], "%Y-%m-%d")
             date = today+datetime.timedelta(days=delta_day)
-            return status, log_str, str(date)[:10]+str(start_time)[10:], str(date)[:10]+str(end_time)[10:], filed_num
+            return status, log_str, str(date)[:10]+str(start_time)[10:], str(date)[:10]+str(end_time)[10:], venue_num
         else:
             log_str += "没有空余场地\n"
             print("没有空余场地\n")

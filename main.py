@@ -38,12 +38,13 @@ def load_config(config):
     user_name = conf['login']['user_name']
     password = conf['login']['password']
     venue = conf['type']['venue']
+    venue_num = conf['type']['venue_num']
     start_time = conf['time']['start_time']
     end_time = conf['time']['end_time']
     wechat_notice = conf.getboolean('wechat', 'wechat_notice')
     sckey = conf['wechat']['SCKEY']
 
-    return (user_name, password, venue, start_time, end_time, wechat_notice, sckey)
+    return (user_name, password, venue, venue_num, start_time, end_time, wechat_notice, sckey)
 
 
 def log_status(config, start_time, log_str):
@@ -59,7 +60,7 @@ def log_status(config, start_time, log_str):
 
 
 def page(config, browser="chrome"):
-    user_name, password, venue, start_time, end_time, wechat_notice, sckey = load_config(
+    user_name, password, venue, venue_num, start_time, end_time, wechat_notice, sckey = load_config(
         config)
 
     log_str = ""
@@ -103,8 +104,8 @@ def page(config, browser="chrome"):
             log_str += "进入预约 %s 界面失败\n" % venue
             status = False
     if status:
-        status, log_book, start_time, end_time, filed_num = book(driver, start_time_list_new,
-                                                                 end_time_list_new, delta_day_list)
+        status, log_book, start_time, end_time, venue_num = book(driver, start_time_list_new,
+                                                                 end_time_list_new, delta_day_list, venue_num)
         log_str += log_book
     else:
         log_str += "点击预约表格失败\n"
@@ -142,7 +143,7 @@ def page(config, browser="chrome"):
     if status and wechat_notice:
         try:
             log_str += wechat_notification(user_name,
-                                           venue, filed_num, start_time, end_time, sckey)
+                                           venue, venue_num, start_time, end_time, sckey)
         except:
             log_str += "微信通知失败\n"
             print("微信通知失败\n")
@@ -177,6 +178,6 @@ if __name__ == '__main__':
     # multi_run(lst_conf, browser)
     # sequence_run(lst_conf, browser)
     for i in range(3):
-        status = page('config2.ini', browser)
+        status = page('config0.ini', browser)
         if status:
             break

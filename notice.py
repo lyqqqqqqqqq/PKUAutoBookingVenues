@@ -5,10 +5,10 @@ from urllib import request
 import json
 
 
-def wechat_notification(user_name, venue, filed_num, start_time, end_time, sckey):
+def wechat_notification(user_name, venue, venue_num, start_time, end_time, sckey):
     with request.urlopen(
             quote('https://sctapi.ftqq.com/' + sckey + '.send?title=成功预约&desp=学号：' +
-                  str(user_name) + ' 成功预约：' + str(venue) + " 场地编号："+str(filed_num) +
+                  str(user_name) + ' 成功预约：' + str(venue) + " 场地编号："+str(venue_num) +
                   " 开始时间："+str(start_time)+" 结束时间："+str(end_time),
                   safe='/:?=&')) as response:
         response = json.loads(response.read().decode('utf-8'))
