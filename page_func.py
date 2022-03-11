@@ -177,13 +177,27 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
         else:
             return False
 
-    def click_free(start_time, end_time, venue_num):
+    def move_to_date(delta_day):
+        for i in range(delta_day):
+            WebDriverWait(driver, 10).until_not(
+                EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
+            driver.find_element_by_xpath(
+                '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
+            time.sleep(0.2)
+
+    def click_free(start_time, end_time, venue_num, table_num):
         trs = driver.find_elements_by_tag_name('tr')
         # 防止表格没加载出来
+        no_table_flag = 0
         while trs[1].find_elements_by_tag_name(
                 'td')[0].find_element_by_tag_name('div').text == "时间段":
-            time.sleep(0.1)
+            no_table_flag += 1
+            time.sleep(0.2)
             trs = driver.find_elements_by_tag_name('tr')
+            if no_table_flag > 10:
+                driver.refresh()
+                no_table_flag = 0
+                move_to_date(delta_day)
         trs_list = []
         for i in range(1, len(trs)-2):
             vt = trs[i].find_elements_by_tag_name(
@@ -192,20 +206,21 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
                 trs_list.append(trs[i].find_elements_by_tag_name(
                     'td'))
         if len(trs_list) == 0:
-            return False, -1
+            return False, -1, 0
 
         j_list = [x for x in range(1, len(trs_list[0]))]
-        if venue_num != -1 and (venue_num in j_list):
+        print(venue_num, table_num, j_list)
+        if venue_num != -1 and (venue_num-table_num in j_list):
             flag = False
             for i in range(len(trs_list)):
-                class_name = trs_list[i][venue_num].find_element_by_tag_name(
+                class_name = trs_list[i][venue_num-table_num].find_element_by_tag_name(
                     'div').get_attribute("class")
                 print(class_name)
                 if class_name.split()[2] == 'free':
                     flag = True
                     break
-        elif venue_num != -1 and (venue_num not in j_list):
-            return False, venue_num
+        elif venue_num != -1 and (venue_num-table_num not in j_list):
+            return False, venue_num, table_num + len(j_list)
         else:
             # 随机点一列free的，防止每次都点第一列
             random.shuffle(j_list)
@@ -218,20 +233,20 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
                     print(class_name)
                     if class_name.split()[2] == 'free':
                         flag = True
-                        venue_num = j
+                        venue_num = j+table_num
                         break
         if flag:
             for i in range(len(trs_list)):
                 WebDriverWait(driver, 10).until_not(
                     EC.visibility_of_element_located((By.CLASS_NAME,
                                                       "loading.ivu-spin.ivu-spin-large.ivu-spin-fix.fade-leave-active.fade-leave-to")))
-                trs_list[i][venue_num].find_element_by_tag_name(
+                trs_list[i][venue_num-table_num].find_element_by_tag_name(
                     'div').click()
-            return True, venue_num
-        return False, venue_num
+            return True, venue_num, table_num + len(j_list)
+        return False, venue_num, table_num + len(j_list)
 
     driver.switch_to.window(driver.window_handles[-1])
-    time.sleep(0.5)
+    time.sleep(1)
     WebDriverWait(driver, 10).until_not(
         EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
     WebDriverWait(driver, 10).until(
@@ -244,9 +259,9 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
             if flag == 2:
                 break
             else:
-                time.sleep(1)
+                time.sleep(0.5)
         driver.refresh()
-        WebDriverWait(driver, 10).until_not(
+        WebDriverWait(driver, 5).until_not(
             EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
 
     for k in range(len(start_time_list)):
@@ -258,12 +273,7 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
             driver.refresh()
             time.sleep(0.5)
 
-        for i in range(delta_day):
-            WebDriverWait(driver, 10).until_not(
-                EC.visibility_of_element_located((By.CLASS_NAME, "loading.ivu-spin.ivu-spin-large.ivu-spin-fix")))
-            driver.find_element_by_xpath(
-                '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/form/div/div/button[2]/i').click()
-            time.sleep(0.2)
+        move_to_date(delta_day)
 
         start_time = datetime.datetime.strptime(
             start_time.split('-')[1], "%H%M")
@@ -271,7 +281,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
         print("开始时间:%s" % str(start_time).split()[1])
         print("结束时间:%s" % str(end_time).split()[1])
 
-        status, venue_num = click_free(start_time, end_time, venue_num)
+        status, venue_num, table_num = click_free(
+            start_time, end_time, venue_num, 0)
         # 如果第一页没有，就往后翻，直到不存在下一页
         while not status:
             next_table = driver.find_elements_by_xpath(
@@ -282,7 +293,8 @@ def book(driver, start_time_list, end_time_list, delta_day_list, venue_num=-1):
             if len(next_table) > 0:
                 driver.find_element_by_xpath(
                     '/html/body/div[1]/div/div/div[3]/div[2]/div/div[2]/div[3]/div[1]/div/div/div/div/div/table/thead/tr/td[6]/div/span/i').click()
-                status, venue_num = click_free(start_time, end_time, venue_num)
+                status, venue_num, table_num = click_free(
+                    start_time, end_time, venue_num, table_num)
             else:
                 break
         if status:

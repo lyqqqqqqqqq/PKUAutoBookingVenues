@@ -38,7 +38,7 @@ def load_config(config):
     user_name = conf['login']['user_name']
     password = conf['login']['password']
     venue = conf['type']['venue']
-    venue_num = conf['type']['venue_num']
+    venue_num = int(conf['type']['venue_num'])
     start_time = conf['time']['start_time']
     end_time = conf['time']['end_time']
     wechat_notice = conf.getboolean('wechat', 'wechat_notice')
